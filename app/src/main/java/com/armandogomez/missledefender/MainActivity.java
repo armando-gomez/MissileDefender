@@ -9,7 +9,6 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.content.pm.ActivityInfo;
-import android.media.AudioManager;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -17,8 +16,10 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 	private static final String TAG = "MainActivity";
@@ -27,7 +28,13 @@ public class MainActivity extends AppCompatActivity {
 	private ConstraintLayout layout;
 	private boolean titleRunning = true;
 
+	private MissileMaker missileMaker;
+
 	private ArrayList<Base> baseList = new ArrayList<>();
+	private ArrayList<Missile> activeMissiles = new ArrayList<>();
+
+	private int score;
+	private TextView scoreText, levelText;
 
 	@SuppressLint("ResourceType")
 	@Override
@@ -36,6 +43,8 @@ public class MainActivity extends AppCompatActivity {
 		setContentView(R.layout.activity_main);
 
 		layout = findViewById(R.id.layout);
+		scoreText = findViewById(R.id.score);
+		levelText = findViewById(R.id.level);
 
 		layout.setOnTouchListener(new View.OnTouchListener() {
 			@Override
@@ -55,18 +64,52 @@ public class MainActivity extends AppCompatActivity {
 		SoundPlayer.getInstance().setupSound(this, "interceptor_blast", R.raw.interceptor_blast, false);
 		SoundPlayer.getInstance().setupSound(this, "interceptor_hit_missle", R.raw.interceptor_hit_missile, false);
 		SoundPlayer.getInstance().setupSound(this, "launch_interceptor", R.raw.launch_interceptor, false);
-		SoundPlayer.getInstance().setupSound(this, "launch_missle", R.raw.launch_missile, false);
+		SoundPlayer.getInstance().setupSound(this, "launch_missile", R.raw.launch_missile, false);
 
 		startTitle();
 	}
 
 	private void startScrollingBackground() {
+		scoreText.setVisibility(View.VISIBLE);
+		levelText.setVisibility(View.VISIBLE);
+
 		new ScrollingBackground(this, layout, R.drawable.clouds, 4000);
 		setUpBases();
 	}
 
 	private void setUpBases() {
+		ImageView[] baseViews = new ImageView[] {findViewById(R.id.base1), findViewById(R.id.base2), findViewById(R.id.base3)};
+		for(int i=0; i < 3; i++) {
+			ImageView imageView = baseViews[i];
+			imageView.setVisibility(View.VISIBLE);
+			Base b = new Base(imageView);
+			baseList.add(b);
+		}
 
+		createMissileMaker();
+	}
+
+	private void createMissileMaker() {
+		missileMaker = new MissileMaker(this, screenWidth, screenHeight);
+		new Thread(missileMaker).start();
+	}
+
+	public void setLevel(final int value) {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				levelText.setText(String.format(Locale.getDefault(), "Level: %d", value));
+			}
+		});
+	}
+
+	public void addMissile(Missile m) {
+		activeMissiles.add(m);
+	}
+
+	public void removeMissile(Missile m) {
+		activeMissiles.remove(m);
+		missileMaker.removeMissile(m);
 	}
 
 	public void handleTouch(float x1, float y1) {

@@ -7,15 +7,13 @@ public class Base {
 
 	Base(ImageView imageView) {
 		this.imageView = imageView;
-		imageView.setX((float) (imageView.getX() + (0.5 * imageView.getWidth())));
-		imageView.setY((float) (imageView.getY() + (0.5 * imageView.getHeight())));
 	}
 
 	public float getX() {
-		return imageView.getX();
+		return (float) (imageView.getX() + (0.5 * imageView.getWidth()));
 	}
 
 	public float getY() {
-		return imageView.getY();
+		return (float) (imageView.getY() + (0.5 * imageView.getHeight()));
 	}
 }
