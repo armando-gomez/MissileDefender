@@ -12,7 +12,10 @@ public class SoundPlayer {
 	private static SoundPlayer instance;
 	private SoundPool soundPool;
 	private static final int MAX_STREAMS = 10;
+
 	private HashSet<Integer> loaded = new HashSet<>();
+	private HashSet<String> loopSet = new HashSet<>();
+
 	private HashMap<String, Integer> soundNameToResource = new HashMap<>();
 
 	private SoundPlayer() {
@@ -25,7 +28,7 @@ public class SoundPlayer {
 			@Override
 			public void onLoadComplete(SoundPool soundPool, int sampleId, int status) {
 				Log.d(TAG, "onLoadComplete: #" + sampleId + " " + status);
-				loaded.add(sampleId);
+				instance.loaded.add(sampleId);
 			}
 		});
 	}
@@ -37,9 +40,12 @@ public class SoundPlayer {
 		return instance;
 	}
 
-	void setupSound(Context context, String id, int resource) {
+	void setupSound(Context context, String id, int resource, boolean loop) {
 		int soundId = soundPool.load(context, resource, 1);
 		soundNameToResource.put(id, soundId);
+		if(loop) {
+			loopSet.add(id);
+		}
 
 		Log.d(TAG, "setupSound: " + id + ": #" + soundId);
 		try {
@@ -50,15 +56,27 @@ public class SoundPlayer {
 	}
 
 	void start(final String id) {
-		int loadId = soundNameToResource.get(id);
-		if (!loaded.contains(loadId)) {
+		if (checkSoundLoad(id)) {
 			Log.d(TAG, "start: SOUND NOT LOADED: " + id);
 			return;
+		}
+
+		int loop = 0;
+		if(loopSet.contains(id)) {
+			loop = -1;
 		}
 
 		Integer resId = soundNameToResource.get(id);
 		if (resId == null)
 			return;
-		soundPool.play(resId, 1f, 1f, 1, 0, 1f);
+		soundPool.play(resId, 1f, 1f, 1, loop, 1f);
+	}
+
+	boolean checkSoundLoad(final String id) {
+		int loadId = soundNameToResource.get(id);
+		if (!loaded.contains(loadId)) {
+			return false;
+		}
+		return true;
 	}
 }

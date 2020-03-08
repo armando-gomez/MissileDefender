@@ -9,16 +9,25 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.content.pm.ActivityInfo;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
+import java.util.ArrayList;
+
 public class MainActivity extends AppCompatActivity {
-	private int screenHeight;
-	private int screenWidth;
+	private static final String TAG = "MainActivity";
+	public static int screenHeight;
+	public static int screenWidth;
 	private ConstraintLayout layout;
+	private boolean titleRunning = true;
+
+	private ArrayList<Base> baseList = new ArrayList<>();
 
 	@SuppressLint("ResourceType")
 	@Override
@@ -26,40 +35,93 @@ public class MainActivity extends AppCompatActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		layout = findViewById(R.layout.activity_main);
+		layout = findViewById(R.id.layout);
+
+		layout.setOnTouchListener(new View.OnTouchListener() {
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				if(event.getAction() == MotionEvent.ACTION_DOWN) {
+					handleTouch(event.getX(), event.getY());
+				}
+				return false;
+			}
+		});
 
 		setupFullScreen();
 		getScreenDimensions();
 
-		SoundPlayer.getInstance().setupSound(this, "background", R.raw.background);
-		SoundPlayer.getInstance().setupSound(this, "base_blast", R.raw.base_blast);
-		SoundPlayer.getInstance().setupSound(this, "interceptor_blast", R.raw.interceptor_blast);
-		SoundPlayer.getInstance().setupSound(this, "interceptor_hit_missle", R.raw.interceptor_hit_missile);
-		SoundPlayer.getInstance().setupSound(this, "launch_interceptor", R.raw.launch_interceptor);
-		SoundPlayer.getInstance().setupSound(this, "launch_missle", R.raw.launch_missile);
+		SoundPlayer.getInstance().setupSound(this, "background", R.raw.background, true);
+		SoundPlayer.getInstance().setupSound(this, "base_blast", R.raw.base_blast, false);
+		SoundPlayer.getInstance().setupSound(this, "interceptor_blast", R.raw.interceptor_blast, false);
+		SoundPlayer.getInstance().setupSound(this, "interceptor_hit_missle", R.raw.interceptor_hit_missile, false);
+		SoundPlayer.getInstance().setupSound(this, "launch_interceptor", R.raw.launch_interceptor, false);
+		SoundPlayer.getInstance().setupSound(this, "launch_missle", R.raw.launch_missile, false);
 
 		startTitle();
 	}
 
-	private void startTitle() {
-		ImageView title = findViewById(R.id.title);
-		ObjectAnimator fadeIn = ObjectAnimator.ofFloat(title, "alpha", 0f, 1f);
-		fadeIn.setDuration(5000);
-		final AnimatorSet set = new AnimatorSet();
+	private void startScrollingBackground() {
+		new ScrollingBackground(this, layout, R.drawable.clouds, 4000);
+		setUpBases();
+	}
 
-		set.addListener(new AnimatorListenerAdapter() {
-			@Override
-			public void onAnimationStart(Animator animation) {
-				super.onAnimationStart(animation);
-				SoundPlayer.getInstance().start("background");
-			}
-		});
+	private void setUpBases() {
 
-		set.start();
+	}
+
+	public void handleTouch(float x1, float y1) {
+		if(!titleRunning) {
+			Log.d(TAG, "handleTouch: " + x1 + ", " + y1);
+		}
+	}
+
+	private void startBackgroundSound(final String id) {
+		SoundPlayer.getInstance().start("background");
 	}
 
 	public ConstraintLayout getLayout() {
 		return layout;
+	}
+
+	private void startTitle() {
+		startBackgroundSound("background");
+		final ImageView imageView = new ImageView(this);
+		titleRunning = true;
+
+		this.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				getLayout().addView(imageView);
+				imageView.setImageResource(R.drawable.title);
+				imageView.setAlpha(0f);
+
+				ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.WRAP_CONTENT, ConstraintLayout.LayoutParams.WRAP_CONTENT);
+				layoutParams.topToTop = R.id.layout;
+				layoutParams.bottomToBottom = R.id.layout;
+				layoutParams.leftToLeft = R.id.layout;
+				layoutParams.rightToRight = R.id.layout;
+
+				imageView.setLayoutParams(layoutParams);
+			}
+		});
+
+		ObjectAnimator fadeIn = ObjectAnimator.ofFloat(imageView, "alpha", 0f, 1f);
+		fadeIn.setDuration(6000);
+
+		fadeIn.addListener(new AnimatorListenerAdapter() {
+			@Override
+			public void onAnimationEnd(Animator animation) {
+				getLayout().removeView(imageView);
+				startScrollingBackground();
+				titleRunning = false;
+			}
+		});
+
+		AnimatorSet set = new AnimatorSet();
+
+		set.play(fadeIn);
+
+		set.start();
 	}
 
 	@SuppressLint("SourceLockedOrientationActivity")
