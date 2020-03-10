@@ -1,10 +1,9 @@
-package com.armandogomez.missledefender;
+package com.armandogomez.missiledefender;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.graphics.drawable.BitmapDrawable;
 import android.widget.ImageView;
 
 public class Base {

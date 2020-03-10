@@ -1,4 +1,4 @@
-package com.armandogomez.missledefender;
+package com.armandogomez.missiledefender;
 
 import android.content.Context;
 import android.media.SoundPool;

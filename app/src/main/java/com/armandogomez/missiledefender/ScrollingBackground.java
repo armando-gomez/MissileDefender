@@ -1,21 +1,16 @@
-package com.armandogomez.missledefender;
+package com.armandogomez.missiledefender;
 
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.util.Log;
-import android.view.ViewGroup;
 import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 
-import static com.armandogomez.missledefender.MainActivity.screenWidth;
-import static com.armandogomez.missledefender.MainActivity.screenHeight;
+import static com.armandogomez.missiledefender.MainActivity.screenWidth;
+import static com.armandogomez.missiledefender.MainActivity.screenHeight;
 
 class ScrollingBackground {
 	private static final String TAG = "ScrollingBackground";

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.armandogomez.missledefender">
+    package="com.armandogomez.missiledefender">
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
@@ -13,9 +13,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".TopTenActivity"></activity>
+        <activity android:name="com.armandogomez.missiledefender.TopTenActivity"></activity>
         <activity
-            android:name=".MainActivity"
+            android:name="com.armandogomez.missiledefender.MainActivity"
             android:screenOrientation="landscape"
             tools:ignore="LockedOrientationActivity">
             <intent-filter>

@@ -1,4 +1,4 @@
-package com.armandogomez.missledefender;
+package com.armandogomez.missiledefender;
 
 public class Score {
 	private long datetime;
