@@ -1,17 +1,20 @@
 package com.armandogomez.missledefender;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.util.Log;
 import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
 
 public class Missile {
-	private static final String TAG = "Missle";
+	private static final String TAG = "Missile";
 	private MainActivity mainActivity;
 	private long screenTime;
 	private int screenWidth, screenHeight;
-	private ImageView imageView;
+	public ImageView imageView;
 	private AnimatorSet set = new AnimatorSet();
 
 	Missile(int screenWidth, int screenHeight, long screenTime, final MainActivity mainActivity) {
@@ -20,13 +23,18 @@ public class Missile {
 		this.screenWidth = screenWidth;
 		this.screenHeight = screenHeight;
 
-		createMissile();
+		imageView = new ImageView(mainActivity);
+
+		mainActivity.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				mainActivity.getLayout().addView(imageView);
+				imageView.setImageResource(R.drawable.missile);
+			}
+		});
 	}
 
-	void createMissile() {
-		imageView = new ImageView(mainActivity);
-		imageView.setImageResource(R.drawable.missile);
-
+	public void createMissile() {
 		int startX = (int) (Math.random() * screenWidth);
 		int endX =  (int) (Math.random() * screenWidth);
 
@@ -45,13 +53,6 @@ public class Missile {
 		imageView.setZ(-10);
 		imageView.setRotation(rotAngle);
 
-		mainActivity.runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				mainActivity.getLayout().addView(imageView);
-			}
-		});
-
 		final ObjectAnimator xAnim = ObjectAnimator.ofFloat(imageView, "x", startX, endX);
 		xAnim.setInterpolator(new LinearInterpolator());
 		xAnim.setDuration(screenTime);
@@ -63,12 +64,25 @@ public class Missile {
 		xAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
 			@Override
 			public void onAnimationUpdate(ValueAnimator animation) {
-				if(imageView.getY() > (screenHeight * 0.85)) {
-					xAnim.cancel();
-					yAnim.cancel();
-					makeGroundBlast();
-					mainActivity.removeMissile(Missile.this);
-				}
+				mainActivity.runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						if(imageView.getY() > (screenHeight * 0.85)) {
+							set.cancel();
+							makeGroundBlast();
+							mainActivity.removeMissile(Missile.this);
+						}
+						Log.d(TAG, "run: NUM VIEWS " +
+								mainActivity.getLayout().getChildCount());
+					}
+				});
+			}
+		});
+
+		xAnim.addListener(new AnimatorListenerAdapter() {
+			@Override
+			public void onAnimationStart(Animator animation) {
+				SoundPlayer.getInstance().start("launch_missile");
 			}
 		});
 
@@ -80,8 +94,101 @@ public class Missile {
 	}
 
 	void stop() {
+		mainActivity.removeMissile(this);
 		set.cancel();
 	}
 
-	void makeGroundBlast() {}
+	void makeGroundBlast() {
+		final ImageView explode = new ImageView(mainActivity);
+		explode.setImageResource(R.drawable.explode);
+
+		float x = imageView.getX();
+		float y = imageView.getY();
+
+		x -= (explode.getDrawable().getIntrinsicWidth())/2;
+		y -= (explode.getDrawable().getIntrinsicWidth())/2;
+
+		explode.setX(x);
+		explode.setY(y);
+		explode.setZ(-15);
+
+		mainActivity.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				mainActivity.getLayout().addView(explode);
+			}
+		});
+
+		final AnimatorSet explodeSet = new AnimatorSet();
+
+		ObjectAnimator fadeOut = ObjectAnimator.ofFloat(explode, "alpha", 1.0f, 0.0f);
+		fadeOut.setDuration(3000);
+
+		fadeOut.addListener(new AnimatorListenerAdapter() {
+			@Override
+			public void onAnimationEnd(Animator animation) {
+				mainActivity.runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						mainActivity.getLayout().removeView(explode);
+					}
+				});
+			}
+		});
+
+		explodeSet.play(fadeOut);
+
+		mainActivity.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				explodeSet.start();
+			}
+		});
+
+		mainActivity.applyMissileBlast(x, y);
+	}
+
+	public void interceptorBlast() {
+		mainActivity.removeMissile(this);
+		final ImageView explode = new ImageView(mainActivity);
+		explode.setImageResource(R.drawable.explode);
+
+		explode.setX(imageView.getX());
+		explode.setY(imageView.getY());
+
+		stop();
+
+		mainActivity.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				mainActivity.getLayout().addView(explode);
+			}
+		});
+
+		final AnimatorSet explodeSet = new AnimatorSet();
+
+		ObjectAnimator fadeOut = ObjectAnimator.ofFloat(explode, "alpha", 1.0f, 0.0f);
+		fadeOut.setDuration(3000);
+
+		fadeOut.addListener(new AnimatorListenerAdapter() {
+			@Override
+			public void onAnimationEnd(Animator animation) {
+				mainActivity.runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						mainActivity.getLayout().removeView(explode);
+					}
+				});
+			}
+		});
+
+		explodeSet.play(fadeOut);
+
+		mainActivity.runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				explodeSet.start();
+			}
+		});
+	}
 }

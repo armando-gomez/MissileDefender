@@ -29,6 +29,9 @@ public class SoundPlayer {
 			public void onLoadComplete(SoundPool soundPool, int sampleId, int status) {
 				Log.d(TAG, "onLoadComplete: #" + sampleId + " " + status);
 				instance.loaded.add(sampleId);
+				if(soundNameToResource.get("background") == sampleId) {
+					start("background");
+				}
 			}
 		});
 	}
@@ -56,7 +59,7 @@ public class SoundPlayer {
 	}
 
 	void start(final String id) {
-		if (checkSoundLoad(id)) {
+		if (!checkSoundLoad(id)) {
 			Log.d(TAG, "start: SOUND NOT LOADED: " + id);
 			return;
 		}

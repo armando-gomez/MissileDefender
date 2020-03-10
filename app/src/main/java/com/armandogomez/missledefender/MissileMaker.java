@@ -44,19 +44,21 @@ public class MissileMaker implements Runnable {
 
 		while(isRunning) {
 			makeMissile(delayBetweenMissiles);
+
 			missileCount++;
-			if(missileCount > missilesPerLevel) {
+
+			if (missileCount > missilesPerLevel) {
 				increaseLevel();
 				missileCount = 0;
 			}
-		}
 
-		int sleepTime = getSleepTime();
+			int sleepTime = getSleepTime();
 
-		try {
-			Thread.sleep(sleepTime);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+			try {
+				Thread.sleep(sleepTime);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -74,6 +76,7 @@ public class MissileMaker implements Runnable {
 	void increaseLevel() {
 		currentLevel++;
 		delayBetweenMissiles -= 500;
+
 		if(delayBetweenMissiles <= 0) {
 			delayBetweenMissiles = 1000;
 		}
@@ -87,18 +90,19 @@ public class MissileMaker implements Runnable {
 	}
 
 	void makeMissile(long delay) {
-		Missile missile = new Missile(screenWidth, screenHeight, delayBetweenMissiles, mainActivity);
-		activeMissiles.add(missile);
-		mainActivity.addMissile(missile);
+		final Missile missile = new Missile(screenWidth, screenHeight, delayBetweenMissiles, mainActivity);
 
-		final AnimatorSet set = missile.getSet();
 		mainActivity.runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				SoundPlayer.getInstance().start("launch_missile");
+				missile.createMissile();
+				final AnimatorSet set = missile.getSet();
 				set.start();
 			}
 		});
+
+		activeMissiles.add(missile);
+		mainActivity.addMissile(missile);
 	}
 
 	public void removeMissile(Missile m) {
