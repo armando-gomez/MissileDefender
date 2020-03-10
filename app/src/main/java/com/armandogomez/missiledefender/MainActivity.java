@@ -315,6 +315,8 @@ public class MainActivity extends AppCompatActivity {
 		missileMakerRunning = false;
 
 		showGameOver();
+		levelText.setVisibility(View.INVISIBLE);
+		scoreText.setVisibility(View.INVISIBLE);
 
 		remoteDatabaseHandler = new RemoteDatabaseHandler(this);
 		remoteDatabaseHandler.execute();
