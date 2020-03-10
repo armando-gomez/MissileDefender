@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
 	private int score, level = 1;
 	private TextView scoreText, levelText;
 
-	@SuppressLint("ResourceType")
+	@SuppressLint({"ResourceType", "ClickableViewAccessibility"})
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -317,18 +317,35 @@ public class MainActivity extends AppCompatActivity {
 		showGameOver();
 
 		remoteDatabaseHandler = new RemoteDatabaseHandler(this);
-		remoteDatabaseHandler.execute(scoreText.getText().toString());
+		remoteDatabaseHandler.execute();
 	}
 
-	public void scoreCheck(Boolean b) {
-		if(b.booleanValue()) {
-			showScoreSubmissionWindow();
+	public void scoreCheck() {
+		boolean topScore = false;
+		ArrayList<Score> scores = remoteDatabaseHandler.getScoresList();
+		for(Score s : scores) {
+			int old = s.getScore();
+			if(old < this.score) {
+				topScore = true;
+				showScoreSubmissionWindow();
+				break;
+			}
 		}
-		openTopTenActivity();
+
+		if(!topScore) {
+			StringBuilder sb = new StringBuilder();
+			for(int i=1; i<=scores.size(); i++) {
+				Score s = scores.get(i-1);
+				sb.append(String.format(Locale.getDefault(), "%2d %s", i, s.toString()));
+			}
+
+			openTopTenActivity(sb.toString());
+		}
 	}
 
-	public void openTopTenActivity() {
+	public void openTopTenActivity(String s) {
 		Intent intent = new Intent(this, TopTenActivity.class);
+		intent.putExtra("DATA", s);
 		startActivity(intent);
 	}
 
@@ -346,12 +363,10 @@ public class MainActivity extends AppCompatActivity {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				String initial = editText.getText().toString().toUpperCase();
-				try {
-					remoteDatabaseHandler.submitScore(initial, score, level);
-					openTopTenActivity();
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
+				RemoteDatabaseSubmit remoteDatabaseSubmit = new RemoteDatabaseSubmit(MainActivity.this);
+				String[] strings = new String[]{initial, Integer.toString(score), Integer.toString(level)};
+
+				remoteDatabaseSubmit.execute(strings);
 			}
 		});
 

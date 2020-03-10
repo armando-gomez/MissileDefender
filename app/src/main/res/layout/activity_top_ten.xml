@@ -14,6 +14,7 @@
         android:layout_marginStart="17dp"
         android:layout_marginTop="16dp"
         android:background="@color/colorDarkBlue"
+        android:onClick="exit"
         android:text="Exit"
         android:textColor="@android:color/background_light"
         app:layout_constraintStart_toStartOf="parent"
@@ -38,5 +39,25 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         app:layout_constraintGuide_percent=".35" />
+
+    <TextView
+        android:id="@+id/output"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:fontFamily="monospace"
+        android:lineSpacingExtra="3sp"
+        android:textAlignment="center"
+        android:textColor="@color/colorNeon"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/topTenTitle"
+        tools:text=" 1   KL  21    55  03/07 03:08  2   TB   9    32  03/09 18:38  3  ARG   4    27  03/10 03:38  4  srp   2    26  03/09 22:15  5   TB   6    22  03/07 20:40  6   TB   7    22  03/09 19:45  7        2    22  03/09 22:13  8   Bo   6    20  03/10 02:40  9   RY   4    19  03/10 00:03 10   PU   4    19  03/09 23:58 " />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
