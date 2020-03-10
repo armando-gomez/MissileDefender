@@ -68,9 +68,8 @@ public class Missile {
 					@Override
 					public void run() {
 						if(imageView.getY() > (screenHeight * 0.85)) {
-							set.cancel();
+							stop();
 							makeGroundBlast();
-							mainActivity.removeMissile(Missile.this);
 						}
 						Log.d(TAG, "run: NUM VIEWS " +
 								mainActivity.getLayout().getChildCount());
@@ -94,8 +93,8 @@ public class Missile {
 	}
 
 	void stop() {
-		mainActivity.removeMissile(this);
 		set.cancel();
+		mainActivity.removeMissile(this);
 	}
 
 	void makeGroundBlast() {
@@ -105,11 +104,13 @@ public class Missile {
 		float x = imageView.getX();
 		float y = imageView.getY();
 
+		explode.setX(x);
+		explode.setY(y);
+
 		x -= (explode.getDrawable().getIntrinsicWidth())/2;
 		y -= (explode.getDrawable().getIntrinsicWidth())/2;
 
-		explode.setX(x);
-		explode.setY(y);
+
 		explode.setZ(-15);
 
 		mainActivity.runOnUiThread(new Runnable() {

@@ -10,7 +10,6 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.text.InputFilter;
@@ -21,11 +20,11 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -39,12 +38,16 @@ public class MainActivity extends AppCompatActivity {
 
 	private MissileMaker missileMaker;
 	private RemoteDatabaseHandler remoteDatabaseHandler;
+	private ScrollingBackground scrollingBackground;
 
 	private ArrayList<Base> baseList = new ArrayList<>();
 	private ArrayList<Missile> activeMissiles = new ArrayList<>();
 
 	private int score, level = 1;
 	private TextView scoreText, levelText;
+	private Button exitButton;
+	private TextView output;
+	private TextView topTenTitle;
 
 	@SuppressLint({"ResourceType", "ClickableViewAccessibility"})
 	@Override
@@ -55,6 +58,10 @@ public class MainActivity extends AppCompatActivity {
 		layout = findViewById(R.id.layout);
 		scoreText = findViewById(R.id.score);
 		levelText = findViewById(R.id.level);
+
+		exitButton = findViewById(R.id.exitButton);
+		output = findViewById(R.id.output);
+		topTenTitle = findViewById(R.id.topTenTitle);
 
 		layout.setOnTouchListener(new View.OnTouchListener() {
 			@Override
@@ -79,11 +86,29 @@ public class MainActivity extends AppCompatActivity {
 		startTitle();
 	}
 
+	@Override
+	public void onPause() {
+		super.onPause();
+
+		SoundPlayer.getInstance().pause();
+		missileMaker.setRunning(false);
+		missileMakerRunning = false;
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+		if(!titleRunning) {
+			SoundPlayer.getInstance().resume();
+			createMissileMaker();
+		}
+	}
+
 	private void startScrollingBackground() {
 		scoreText.setVisibility(View.VISIBLE);
 		levelText.setVisibility(View.VISIBLE);
 
-		new ScrollingBackground(this, layout, R.drawable.clouds, 4000);
+		scrollingBackground = new ScrollingBackground(this, layout, R.drawable.clouds, 4000);
 		setUpBases();
 	}
 
@@ -300,6 +325,8 @@ public class MainActivity extends AppCompatActivity {
 			@Override
 			public void onAnimationEnd(Animator animation) {
 				getLayout().removeView(imageView);
+				remoteDatabaseHandler = new RemoteDatabaseHandler(MainActivity.this);
+				remoteDatabaseHandler.execute();
 			}
 		});
 
@@ -313,13 +340,11 @@ public class MainActivity extends AppCompatActivity {
 	private void endGame() {
 		missileMaker.setRunning(false);
 		missileMakerRunning = false;
+		scrollingBackground.animateStop();
 
 		showGameOver();
 		levelText.setVisibility(View.INVISIBLE);
 		scoreText.setVisibility(View.INVISIBLE);
-
-		remoteDatabaseHandler = new RemoteDatabaseHandler(this);
-		remoteDatabaseHandler.execute();
 	}
 
 	public void scoreCheck() {
@@ -341,14 +366,22 @@ public class MainActivity extends AppCompatActivity {
 				sb.append(String.format(Locale.getDefault(), "%2d %s", i, s.toString()));
 			}
 
-			openTopTenActivity(sb.toString());
+			displayScores(sb.toString());
 		}
 	}
 
-	public void openTopTenActivity(String s) {
-		Intent intent = new Intent(this, TopTenActivity.class);
-		intent.putExtra("DATA", s);
-		startActivity(intent);
+	public void displayScores(String data) {
+		String headers = String.format(Locale.getDefault(), "%2s %4s %5s %5s %12s%n", "#", "Init", "Level", "Score", "Date/Time");
+		String text = headers + data;
+		output.setText(text);
+
+		topTenTitle.setVisibility(View.VISIBLE);
+		output.setVisibility(View.VISIBLE);
+		exitButton.setVisibility(View.VISIBLE);
+	}
+
+	public void exit(View v) {
+		finish();
 	}
 
 	private void showScoreSubmissionWindow() {

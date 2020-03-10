@@ -82,4 +82,12 @@ public class SoundPlayer {
 		}
 		return true;
 	}
+
+	public void pause() {
+		soundPool.autoPause();
+	}
+
+	public void resume() {
+		soundPool.autoResume();
+	}
 }

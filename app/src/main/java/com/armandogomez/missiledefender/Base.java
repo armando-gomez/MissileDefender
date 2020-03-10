@@ -27,7 +27,7 @@ public class Base {
 		mainActivity.runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				float newY = y - imageView.getHeight();
+				float newY = y;
 				imageView.setX(x);
 				imageView.setY(newY);
 			}
@@ -35,11 +35,13 @@ public class Base {
 	}
 
 	public float getX() {
-		return (float) (imageView.getX() + (0.5 * imageView.getWidth()));
+		float width = (float) (0.5 * imageView.getWidth());
+		return (imageView.getX() - width);
 	}
 
 	public float getY() {
-		return (float) (imageView.getY() + (0.5 * imageView.getHeight()));
+		float height = (float) (0.5 * imageView.getHeight());
+		return (imageView.getY() - height);
 	}
 
 	public void destruct() {
@@ -53,8 +55,8 @@ public class Base {
 		final ImageView blast = new ImageView(mainActivity);
 		blast.setImageResource(R.drawable.blast);
 
-		blast.setX(imageView.getX());
-		blast.setY(imageView.getY());
+		blast.setX(getX());
+		blast.setY(getY());
 
 		mainActivity.runOnUiThread(new Runnable() {
 			@Override

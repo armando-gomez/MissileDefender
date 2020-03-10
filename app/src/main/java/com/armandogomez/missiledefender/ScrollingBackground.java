@@ -20,6 +20,7 @@ class ScrollingBackground {
 	private ImageView backImageB;
 	private long duration;
 	private int resId;
+	private ValueAnimator animator;
 
 	ScrollingBackground(Context context, ConstraintLayout layout, int resId, long duration) {
 		this.context = context;
@@ -57,7 +58,7 @@ class ScrollingBackground {
 	}
 
 	private void animateBack() {
-		ValueAnimator animator = ValueAnimator.ofFloat(0.0f, 1.0f);
+		animator = ValueAnimator.ofFloat(0.0f, 1.0f);
 		animator.setRepeatCount(ValueAnimator.INFINITE);
 		animator.setInterpolator(new LinearInterpolator());
 		animator.setDuration(duration);
@@ -77,6 +78,10 @@ class ScrollingBackground {
 		});
 
 		animator.start();
+	}
+
+	public void animateStop() {
+		animator.cancel();
 	}
 
 

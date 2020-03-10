@@ -30,7 +30,7 @@ public class RemoteDatabaseSubmit extends AsyncTask<String, Void, String> {
 	@Override
 	protected void onPostExecute(String s) {
 		Log.d(TAG, "onPostExecute: " + s);
-		mainActivity.openTopTenActivity(s);
+		mainActivity.displayScores(s);
 	}
 
 	@Override
