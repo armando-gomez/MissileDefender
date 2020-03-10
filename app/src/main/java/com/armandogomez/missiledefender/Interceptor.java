@@ -87,6 +87,8 @@ public class Interceptor {
 	AnimatorSet getSet() { return set; }
 
 	private void makeBlast() {
+		mainActivity.removeInterceptor(this);
+
 		SoundPlayer.getInstance().start("interceptor_blast");
 		final ImageView blast = new ImageView(mainActivity);
 		blast.setImageResource(R.drawable.i_explode);
@@ -133,7 +135,6 @@ public class Interceptor {
 				set.start();
 			}
 		});
-
 		mainActivity.applyInterceptorBlast(x, y);
 	}
 

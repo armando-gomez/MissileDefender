@@ -1,5 +1,9 @@
 package com.armandogomez.missiledefender;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -20,7 +24,7 @@ class ScrollingBackground {
 	private ImageView backImageB;
 	private long duration;
 	private int resId;
-	private ValueAnimator animator;
+	private AnimatorSet animatorTranslate;
 
 	ScrollingBackground(Context context, ConstraintLayout layout, int resId, long duration) {
 		this.context = context;
@@ -48,8 +52,8 @@ class ScrollingBackground {
 		backImageA.setImageBitmap(backBitmapA);
 		backImageB.setImageBitmap(backBitmapB);
 
-		backImageA.setAlpha(0.3f);
-		backImageB.setAlpha(0.3f);
+		backImageA.setAlpha(0.25f);
+		backImageB.setAlpha(0.25f);
 
 		backImageA.setScaleType(ImageView.ScaleType.FIT_XY);
 		backImageB.setScaleType(ImageView.ScaleType.FIT_XY);
@@ -58,12 +62,14 @@ class ScrollingBackground {
 	}
 
 	private void animateBack() {
-		animator = ValueAnimator.ofFloat(0.0f, 1.0f);
-		animator.setRepeatCount(ValueAnimator.INFINITE);
-		animator.setInterpolator(new LinearInterpolator());
-		animator.setDuration(duration);
+		animatorTranslate = new AnimatorSet();
 
-		animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+		ValueAnimator translate = ValueAnimator.ofFloat(0.0f, 1.0f);
+		translate.setRepeatCount(ValueAnimator.INFINITE);
+		translate.setInterpolator(new LinearInterpolator());
+		translate.setDuration(duration);
+
+		translate.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
 			@Override
 			public void onAnimationUpdate(ValueAnimator animation) {
 				final float progress = (float) animation.getAnimatedValue();
@@ -77,13 +83,16 @@ class ScrollingBackground {
 			}
 		});
 
-		animator.start();
+		animatorTranslate.play(translate);
+
+		animatorTranslate.start();
 	}
 
 	public void animateStop() {
-		animator.cancel();
+		animatorTranslate.cancel();
+		layout.removeView(backImageA);
+		layout.removeView(backImageB);
 	}
-
 
 	private int getBarHeight() {
 		int resourceId = context.getResources().getIdentifier("navigation_bar_height", "dimen", "android");

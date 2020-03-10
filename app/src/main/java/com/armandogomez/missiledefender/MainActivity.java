@@ -42,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
 
 	private ArrayList<Base> baseList = new ArrayList<>();
 	private ArrayList<Missile> activeMissiles = new ArrayList<>();
+	private ArrayList<Interceptor> activeInterceptors = new ArrayList<>();
 
 	private int score, level = 1;
 	private TextView scoreText, levelText;
@@ -173,13 +174,15 @@ public class MainActivity extends AppCompatActivity {
 				}
 			}
 
-			launchInterceptor(close, x, y);
+			if(activeInterceptors.size() < 3 && y < (screenHeight * .8)) {
+				launchInterceptor(close, x, y);
+			}
 		}
 	}
 
 	private void launchInterceptor(Base base, float x, float y) {
 		Interceptor interceptor = new Interceptor(this, base, x, y, screenHeight);
-
+		activeInterceptors.add(interceptor);
 		interceptor.createInterceptor();
 
 		final AnimatorSet set = interceptor.getSet();
@@ -190,6 +193,10 @@ public class MainActivity extends AppCompatActivity {
 				set.start();
 			}
 		});
+	}
+
+	public void removeInterceptor(Interceptor i) {
+		activeInterceptors.remove(i);
 	}
 
 	public ConstraintLayout getLayout() {
@@ -290,6 +297,21 @@ public class MainActivity extends AppCompatActivity {
 				m.interceptorBlast();
 
 				activeMissiles.remove(m);
+			}
+		}
+
+		for(int i=0; i < baseList.size(); i++) {
+			Base b = baseList.get(i);
+			float baseX = b.getX();
+			float baseY = b.getY();
+
+			if(distanceCalc(baseX, baseY, x, y) < 120) {
+				baseList.remove(b);
+				b.destruct();
+
+				if(baseList.size() == 0) {
+					endGame();
+				}
 			}
 		}
 	}
