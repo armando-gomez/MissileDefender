@@ -174,7 +174,7 @@ public class MainActivity extends AppCompatActivity {
 				}
 			}
 
-			if(activeInterceptors.size() < 3 && y < (screenHeight * .8)) {
+			if(activeInterceptors.size() < 3) {
 				launchInterceptor(close, x, y);
 			}
 		}
